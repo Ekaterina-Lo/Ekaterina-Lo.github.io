@@ -100,7 +100,7 @@ const LEVELS = [
                 question: 'Какой размер финансовой подушки рекомендуется финансовыми экспертами?',
                 answers: [
                     '1-2 месяца расходов',
-                    '3-6 месяцев расходов', 
+                    '3-6 месяцев расходов',
                     '1 год расходов',
                     'Финансовая подушка не нужна'
                 ],
@@ -225,7 +225,7 @@ const LEVELS = [
         description: 'Научитесь ставить и достигать финансовые цели с помощью правильного планирования',
         difficulty: 2,
         reward: 120,
-        topic: 'Планирование', 
+        topic: 'Планирование',
         icon: '🎯',
         questions: [
             {
@@ -244,7 +244,7 @@ const LEVELS = [
                 answers: [
                     'Сначала достичь одну цель, потом другую',
                     'Откладывать на все цели одновременно, распределяя по приоритетам',
-                    'Взять кредит на все цели сразу', 
+                    'Взять кредит на все цели сразу',
                     'Откладывать только на самую приятную цель'
                 ],
                 correctAnswer: 1,
@@ -255,7 +255,7 @@ const LEVELS = [
                 answers: [
                     '5-10%',
                     '10-20%',
-                    '30-50%', 
+                    '30-50%',
                     'Столько, сколько останется после всех трат'
                 ],
                 correctAnswer: 1,
@@ -277,7 +277,7 @@ const LEVELS = [
                 answers: [
                     'Чтобы хвастаться перед друзьями',
                     'Чтобы видеть прогресс и корректировать план',
-                    'Это требование налоговой службы', 
+                    'Это требование налоговой службы',
                     'Учет не нужен, главное - откладывать'
                 ],
                 correctAnswer: 1,
@@ -328,7 +328,7 @@ const ACHIEVEMENTS = {
         icon: '🎯'
     },
     all_levels: {
-        id: 'all_levels', 
+        id: 'all_levels',
         title: 'Мастер финансов',
         description: 'Пройдите все уровни',
         icon: '🏆'
@@ -399,7 +399,7 @@ function setupEventListeners() {
     document.getElementById('menu-btn').addEventListener('click', () => showScreen('main-menu'));
     document.getElementById('help-btn').addEventListener('click', () => showScreen('help-screen'));
     document.getElementById('help-back-btn').addEventListener('click', () => showScreen('main-menu'));
-    
+
     // Игровые действия
     document.getElementById('play-again-btn').addEventListener('click', restartLevel);
     document.getElementById('reset-progress-btn').addEventListener('click', resetProgress);
@@ -414,25 +414,34 @@ function setupEventListeners() {
     });
 }
 
-function registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/service-worker.js')
-            .then(registration => {
-                console.log('Service Worker зарегистрирован:', registration);
-            })
-            .catch(error => {
-                console.log('Ошибка регистрации Service Worker:', error);
-            });
+function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+    });
+    const targetScreen = document.getElementById(screenId);
+    targetScreen.classList.add('active');
+
+    // Прокручиваем к началу экрана
+    targetScreen.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    if (screenId === 'profile-screen') {
+        renderProfile();
     }
 }
 
 // Управление экранами
 function showScreen(screenId) {
+    // Сначала скрываем все экраны
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
     });
-    document.getElementById(screenId).classList.add('active');
-    
+    // Затем показываем нужный
+    const targetScreen = document.getElementById(screenId);
+    targetScreen.classList.add('active');
+
+    // Прокручиваем к началу экрана
+    targetScreen.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
     if (screenId === 'profile-screen') {
         renderProfile();
     }
@@ -441,10 +450,10 @@ function showScreen(screenId) {
 function showNotification(message, duration = 3000) {
     const notification = document.getElementById('notification');
     const notificationText = document.getElementById('notification-text');
-    
+
     notificationText.textContent = message;
     notification.classList.remove('hidden');
-    
+
     setTimeout(() => {
         notification.classList.add('hidden');
     }, duration);
@@ -495,7 +504,7 @@ function resetProgress() {
 function exportData() {
     const dataStr = JSON.stringify(window.gameProgress, null, 2);
     const dataBlob = new Blob([dataStr], {type: 'application/json'});
-    
+
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
@@ -504,7 +513,7 @@ function exportData() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    
+
     showNotification('Данные успешно экспортированы!');
 }
 
@@ -512,17 +521,17 @@ function exportData() {
 function startLevel(levelId) {
     const level = LEVELS.find(l => l.id === levelId);
     if (!level) return;
-    
+
     gameState.currentLevel = level;
     gameState.currentQuestion = 0;
     gameState.score = 0;
     gameState.selectedAnswer = null;
     gameState.showFeedback = false;
     gameState.startTime = Date.now();
-    
+
     window.gameProgress.playCount = (window.gameProgress.playCount || 0) + 1;
     saveProgress();
-    
+
     document.getElementById('level-title').textContent = level.title;
     document.getElementById('level-topic').textContent = level.topic;
     showScreen('level-screen');
@@ -532,11 +541,11 @@ function startLevel(levelId) {
 function renderQuestion() {
     const question = gameState.currentLevel.questions[gameState.currentQuestion];
     const progress = ((gameState.currentQuestion + 1) / gameState.currentLevel.questions.length) * 100;
-    
+
     document.getElementById('progress-fill').style.width = `${progress}%`;
-    document.getElementById('level-progress').textContent = 
+    document.getElementById('level-progress').textContent =
         `Вопрос ${gameState.currentQuestion + 1}/${gameState.currentLevel.questions.length}`;
-    
+
     const container = document.getElementById('question-container');
     container.innerHTML = `
         <div class="question-text">${question.question}</div>
@@ -548,19 +557,19 @@ function renderQuestion() {
             `).join('')}
         </div>
     `;
-    
+
     document.getElementById('feedback').classList.add('hidden');
 }
 
 function selectAnswer(answerIndex) {
     if (gameState.showFeedback) return;
-    
+
     gameState.selectedAnswer = answerIndex;
     gameState.showFeedback = true;
-    
+
     const question = gameState.currentLevel.questions[gameState.currentQuestion];
     const isCorrect = answerIndex === question.correctAnswer;
-    
+
     // 🔊 Воспроизводим звук
     if (isCorrect) {
         gameState.score++;
@@ -568,7 +577,7 @@ function selectAnswer(answerIndex) {
     } else {
         playIncorrectSound();
     }
-    
+
     // Подсветка ответов
     const answerButtons = document.querySelectorAll('.answer-btn');
     answerButtons.forEach((btn, index) => {
@@ -579,17 +588,17 @@ function selectAnswer(answerIndex) {
             btn.classList.add('incorrect');
         }
     });
-    
+
     // Показ фидбека
     const feedback = document.getElementById('feedback');
     const feedbackIcon = document.getElementById('feedback-icon');
     const feedbackText = document.getElementById('feedback-text');
-    
+
     feedback.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
     feedbackIcon.textContent = isCorrect ? '✅' : '❌';
     feedbackText.textContent = question.explanation;
     feedback.classList.remove('hidden');
-    
+
     document.getElementById('next-btn').onclick = nextQuestion;
 }
 
@@ -597,7 +606,7 @@ function nextQuestion() {
     gameState.currentQuestion++;
     gameState.selectedAnswer = null;
     gameState.showFeedback = false;
-    
+
     if (gameState.currentQuestion < gameState.currentLevel.questions.length) {
         renderQuestion();
     } else {
@@ -613,21 +622,21 @@ function finishLevel() {
     const isPerfect = gameState.score === totalQuestions;
     const bonusExp = isPerfect ? GAME_CONFIG.bonusExpPerfect : 0;
     const totalExp = expEarned + bonusExp + level.reward;
-    
+
     const timeSpent = Math.round((Date.now() - gameState.startTime) / 1000);
     window.gameProgress.totalPlayTime = (window.gameProgress.totalPlayTime || 0) + timeSpent;
-    
-    const levelProgress = window.gameProgress.levels[level.id] || { 
-        completed: false, 
+
+    const levelProgress = window.gameProgress.levels[level.id] || {
+        completed: false,
         bestScore: 0,
         playCount: 0,
         totalTime: 0
     };
-    
+
     levelProgress.playCount = (levelProgress.playCount || 0) + 1;
     levelProgress.totalTime = (levelProgress.totalTime || 0) + timeSpent;
     levelProgress.lastScore = scorePercentage;
-    
+
     if (scorePercentage >= GAME_CONFIG.requiredScore) {
         levelProgress.completed = true;
         if (scorePercentage > levelProgress.bestScore) {
@@ -638,66 +647,66 @@ function finishLevel() {
             checkAchievements('first_level');
         }
     }
-    
+
     window.gameProgress.levels[level.id] = levelProgress;
     window.gameProgress.totalExp += totalExp;
-    
+
     if (isPerfect) checkAchievements('perfect_score');
     if (timeSpent < 120) checkAchievements('fast_learner');
     if (window.gameProgress.totalExp >= 500) checkAchievements('exp_500');
     if (window.gameProgress.completedLevels >= LEVELS.length) checkAchievements('all_levels');
-    
+
     const newUserLevel = Math.floor(window.gameProgress.totalExp / GAME_CONFIG.expPerLevel) + 1;
     if (newUserLevel > window.gameProgress.userLevel) {
         window.gameProgress.userLevel = newUserLevel;
         showNotification(`🎉 Поздравляем! Вы достигли ${newUserLevel} уровня!`);
     }
-    
+
     saveProgress();
-    
+
     // 🔊 Звук при успешном прохождении
     if (scorePercentage >= GAME_CONFIG.requiredScore) {
         playLevelCompleteSound();
     }
-    
+
     showResults(scorePercentage, totalExp, bonusExp, isPerfect, timeSpent);
 }
 
 function showResults(score, expEarned, bonusExp, isPerfect, timeSpent) {
     const levelProgress = window.gameProgress.levels[gameState.currentLevel.id];
     const bestScore = levelProgress.bestScore;
-    
+
     document.getElementById('result-icon').textContent = score >= GAME_CONFIG.requiredScore ? '🎉' : '😔';
-    document.getElementById('result-title').textContent = 
+    document.getElementById('result-title').textContent =
         score >= GAME_CONFIG.requiredScore ? 'Уровень пройден!' : 'Попробуйте еще раз';
     document.getElementById('correct-answers').textContent = `${gameState.score}/${gameState.currentLevel.questions.length}`;
     document.getElementById('exp-earned').textContent = `+${expEarned}${bonusExp ? ` (+${bonusExp} бонус)` : ''}`;
     document.getElementById('best-score').textContent = `${bestScore}%`;
-    
+
     const achievementsContainer = document.getElementById('achievements');
     achievementsContainer.innerHTML = '';
-    
+
     let newAchievements = 0;
-    
+
     if (isPerfect) {
         const achievement = createAchievementElement(ACHIEVEMENTS.perfect_score, true);
         achievementsContainer.appendChild(achievement);
         newAchievements++;
     }
-    
+
     if (!window.gameProgress.levels[gameState.currentLevel.id]?.completed && score >= GAME_CONFIG.requiredScore) {
         const achievement = createAchievementElement(ACHIEVEMENTS.first_level, true);
         achievementsContainer.appendChild(achievement);
         newAchievements++;
     }
-    
+
     const achievementsSection = document.getElementById('achievements-container');
     achievementsSection.style.display = newAchievements > 0 ? 'block' : 'none';
-    
+
     if (newAchievements > 0) {
         showNotification(`🎖️ Получено ${newAchievements} нов${newAchievements === 1 ? 'ое' : 'ых'} достижения!`);
     }
-    
+
     showScreen('results-screen');
 }
 
